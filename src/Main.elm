@@ -12,24 +12,39 @@ main =
     }
 
 -- MODEL
-type alias Model = Int
+type alias Model = Maze.Maze
 
 model : Model
-model = 0
+model = Maze.defaultMaze
 
 -- UPDATE
-type Msg = Solve | Reset
+type Msg = Solve Maze.Maze | Reset
 
 update : Msg -> Model -> Model
 update msg model =
-  case msg of Solve -> 1
-              Reset -> 0
+  case msg of Solve maze -> model
+              Reset -> Maze.defaultMaze
 
 -- VIEW
+
+mazeString : Model -> String
+mazeString maze = String.fromList <| List.concat <| List.map String.toList <| List.intersperse "\n" maze
+
+toMaze : String -> Maze.Maze
+toMaze s = String.lines s
+
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ type_ "textarea", placeholder (toString model) ] []
-    , button [ onClick Solve ] [ text "Solve" ]
-    , button [ onClick Reset ] [ text "Reset" ]
+    [ textarea [ rows 5, cols 5, myStyle ] [ text <| mazeString model ]
+    , button [ onClick (Solve model) ] [ text "Solve" ]
+    , div [ myStyle ] [ text "l8r g8r" ]
+    ]
+
+myStyle =
+  style
+    [ ("padding", "10px 0")
+    , ("font-size", "2em")
+    , ("text-align", "left")
+    , ("font-family", "monospace")
     ]

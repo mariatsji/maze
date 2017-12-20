@@ -75,3 +75,11 @@ insideMaze maze (r,c) = r < List.length maze && r >= 0 && c < width maze && c >=
 width : Maze -> Int
 width s = case List.head s of Just r -> List.length (String.toList r)
                               Nothing -> 0
+
+defaultMaze : Maze
+defaultMaze =
+  ["#####"
+  ,"# # #"
+  ,"  #  "
+  ,"#   #"
+  ,"#####"]
