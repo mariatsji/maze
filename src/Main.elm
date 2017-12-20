@@ -22,7 +22,9 @@ type Msg = Solve Maze.Maze | Reset
 
 update : Msg -> Model -> Model
 update msg model =
-  case msg of Solve maze -> model
+  case msg of Solve maze -> let solution = Maze.search model [Maze.entrance]
+                                solutionPath = Maze.solution solution [Maze.entrance]
+                            in (Maze.asMaze model solutionPath)
               Reset -> Maze.defaultMaze
 
 -- VIEW

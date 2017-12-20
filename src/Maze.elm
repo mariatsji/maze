@@ -1,6 +1,6 @@
 module Maze exposing (..)
 
-import List.Extra exposing (getAt, init)
+import List.Extra exposing (getAt, init, zip)
 
 type alias Row = Int
 type alias Col = Int
@@ -19,16 +19,16 @@ last : Path -> Point
 last p = Maybe.withDefault (-1,-1) <| List.head (List.reverse p)
 
 right : Maze -> Path -> Point
-right m p = let (c,r) = last p in (c + 1, r)
+right m p = let (r,c) = last p in (r + 1, c)
 
 down : Maze -> Path -> Point
-down m p = let (c,r) = last p in (c, r + 1)
+down m p = let (r,c) = last p in (r, c + 1)
 
 left : Maze -> Path -> Point
-left m p = let (c,r) = last p in (c - 1, r)
+left m p = let (r,c) = last p in (r - 1, c)
 
 up : Maze -> Path -> Point
-up m p = let (c,r) =  last p in (c, r - 1)
+up m p = let (r,c) =  last p in (r, c - 1)
 
 search : Maze -> Path -> Paths
 search m p = MazeNode (if last p == (-1,-1) then entrance else last p) (search1 m (p ++ [right m p])) (search1 m (p ++ [down m p])) (search1 m (p ++ [left m p])) (search1 m (p ++ [up m p]))
@@ -57,7 +57,7 @@ hasBeenThere m p = case p of
   (x::xs) -> if last p == x then True else hasBeenThere m xs
 
 foundExit : Maze -> Path -> Bool
-foundExit m path = let (c,r) = last path in (c,r) == exit
+foundExit m path = let (r,c) = last path in (r,c) == exit
 
 isEmpty : Maze -> Point -> Bool
 isEmpty maze (r,c) = symbolAt maze (r,c) == ' '
@@ -75,6 +75,18 @@ insideMaze maze (r,c) = r < List.length maze && r >= 0 && c < width maze && c >=
 width : Maze -> Int
 width s = case List.head s of Just r -> List.length (String.toList r)
                               Nothing -> 0
+
+asMaze : Maze -> Path -> Maze
+asMaze maze path = let chars = coords maze path in List.map (String.fromList) chars
+
+coords : Maze -> Path -> List (List Char)
+coords maze p = List.map (\(str, r) -> List.map (\(char, c) -> if List.member (r,c) p then '*' else symbolAt maze (r,c)) (innerZipped str)) (zipped maze)
+
+zipped : Maze -> List (String, Int)
+zipped maze = zip maze <| List.range 0 (List.length maze - 1)
+
+innerZipped : String -> List (Char, Int)
+innerZipped s = zip (String.toList s) <| List.range 0 (String.length s - 1)
 
 defaultMaze : Maze
 defaultMaze =
