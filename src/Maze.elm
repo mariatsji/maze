@@ -16,7 +16,7 @@ exit : Point
 exit = (2,4)
 
 last : Path -> Point
-last p = Maybe.withDefault (-1,-1) <| List.head (List.reverse p)
+last p = Maybe.withDefault entrance <| List.head (List.reverse p)
 
 right : Maze -> Path -> Point
 right m p = let (r,c) = last p in (r + 1, c)
@@ -31,14 +31,17 @@ up : Maze -> Path -> Point
 up m p = let (r,c) =  last p in (r, c - 1)
 
 search : Maze -> Path -> Paths
-search m p = MazeNode (if last p == (-1,-1) then entrance else last p) (search1 m (p ++ [right m p])) (search1 m (p ++ [down m p])) (search1 m (p ++ [left m p])) (search1 m (p ++ [up m p]))
+search m p = MazeNode (last p) (search1 m (p ++ [right m p])) (search1 m (p ++ [down m p])) (search1 m (p ++ [left m p])) (search1 m (p ++ [up m p]))
 
 search1 : Maze -> Path -> Paths
 search1 m p =
   if foundExit m p then Exit (last p)
-  else if hasBeenThere m p then Deadend (last p)
+  else if hasBeenThere p then Deadend (last p)
   else if insideMaze m (last p) && isEmpty m (last p) then search m p
   else Deadend (last p)
+
+solve : Maze -> Path
+solve maze = solution (search maze [entrance]) [entrance]
 
 solution : Paths -> Path -> Path
 solution paths p =
@@ -51,10 +54,8 @@ solution paths p =
                   else []
                 Deadend n -> []
 
-hasBeenThere : Maze -> Path -> Bool
-hasBeenThere m p = case p of
-  [] -> False
-  (x::xs) -> if last p == x then True else hasBeenThere m xs
+hasBeenThere : Path -> Bool
+hasBeenThere p = List.member (last p) <| Maybe.withDefault [] (init p)
 
 foundExit : Maze -> Path -> Bool
 foundExit m path = let (r,c) = last path in (r,c) == exit
@@ -77,7 +78,7 @@ width s = case List.head s of Just r -> List.length (String.toList r)
                               Nothing -> 0
 
 asMaze : Maze -> Path -> Maze
-asMaze maze path = let chars = coords maze path in List.map (String.fromList) chars
+asMaze maze p = let chars = coords maze p in List.map (String.fromList) chars
 
 coords : Maze -> Path -> List (List Char)
 coords maze p = List.map (\(str, r) -> List.map (\(char, c) -> if List.member (r,c) p then '*' else symbolAt maze (r,c)) (innerZipped str)) (zipped maze)

@@ -21,10 +21,8 @@ model = Maze.defaultMaze
 type Msg = Solve Maze.Maze | Reset
 
 update : Msg -> Model -> Model
-update msg model =
-  case msg of Solve maze -> let solution = Maze.search model [Maze.entrance]
-                                solutionPath = Maze.solution solution [Maze.entrance]
-                            in (Maze.asMaze model solutionPath)
+update msg mo =
+  case msg of Solve maze -> Maze.asMaze maze <| Maze.solve maze
               Reset -> Maze.defaultMaze
 
 -- VIEW
@@ -36,11 +34,13 @@ toMaze : String -> Maze.Maze
 toMaze s = String.lines s
 
 view : Model -> Html Msg
-view model =
+view maz =
   div []
-    [ textarea [ rows 5, cols 5, myStyle ] [ text <| mazeString model ]
-    , button [ onClick (Solve model) ] [ text "Solve" ]
-    , div [ myStyle ] [ text "l8r g8r" ]
+    [ textarea [ rows 5, cols 5, myStyle ] [ text <| mazeString maz ]
+    , button [ onClick (Solve maz) ] [ text "Solve" ]
+    , button [ onClick Reset ] [ text "reset" ]
+    , div [ myStyle ]
+      [ textarea [ rows 5, cols 5, myStyle ] [ text <| mazeString maz ] ]
     ]
 
 myStyle =
