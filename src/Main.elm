@@ -1,6 +1,6 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 
 import Maze
 
@@ -18,11 +18,11 @@ model : Model
 model = Maze.defaultMaze
 
 -- UPDATE
-type Msg = Solve Maze.Maze | Reset
+type Msg = Solve String | Reset
 
 update : Msg -> Model -> Model
 update msg mo =
-  case msg of Solve maze -> Maze.asMaze maze <| Maze.solve maze
+  case msg of Solve mazeString -> let maze = toMaze mazeString in Maze.asMaze maze <| Maze.solve maze
               Reset -> Maze.defaultMaze
 
 -- VIEW
@@ -36,8 +36,7 @@ toMaze s = String.lines s
 view : Model -> Html Msg
 view maz =
   div []
-    [ textarea [ rows 5, cols 5, myStyle ] [ text <| mazeString maz ]
-    , button [ onClick (Solve maz) ] [ text "Solve" ]
+    [ textarea [ rows 5, cols 5, myStyle, onInput Solve] [ text <| mazeString maz ]
     , button [ onClick Reset ] [ text "reset" ]
     , div [ myStyle ]
       [ textarea [ rows 5, cols 5, myStyle ] [ text <| mazeString maz ] ]
